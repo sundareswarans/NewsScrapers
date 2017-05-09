@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from collections import defaultdict
 from pymongo.errors import DuplicateKeyError
 
+
 class TransformPipeLine(object):
     """
     This pipe-line accpets an NewsItem and transforms it

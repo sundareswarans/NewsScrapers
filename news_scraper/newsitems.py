@@ -13,7 +13,7 @@ class NewsItem(scrapy.Item):
     Structured data for storing the Author and an Article
     """
     # Author's name
-    author = scrapy.Field(output_processor=TakeFirst())
+    author = scrapy.Field(output_processor=Join())
     
     # Author's profile URL
     author_profile_url = scrapy.Field(output_processor=Join())
