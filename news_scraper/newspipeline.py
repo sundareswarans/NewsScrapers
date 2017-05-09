@@ -5,6 +5,7 @@ import os
 from pymongo import MongoClient
 from collections import defaultdict
 from pymongo.errors import DuplicateKeyError
+import itertools
 
 
 class TransformPipeLine(object):
@@ -16,7 +17,12 @@ class TransformPipeLine(object):
         """
         Processes an News item, and cleanses the items
         """
-        item['article_text'] = ''.join([t for t in item['article_text'] if t.strip('\n')])
+	# Remove all the empty lines.
+        text = [txt
+                for txt in item['article_text'].split('\n')
+                if txt.rstrip('\n')
+               ]
+        item['article_text'] = ''.join(text)
         keywords = set()
         for t in item['keywords']:
             keywords |= set(t.split(','))
@@ -24,7 +30,6 @@ class TransformPipeLine(object):
         return item
 
 
-#
 # NOTE: We are using SSL connection for connecting to the MongoDB
 # The CA certificate needs to be installed in the host where we run the client
 #
@@ -67,7 +72,7 @@ class LoadPipeLine(object):
             self.authors.insert_one({ '_id': item['author'],
                                       'profile_url': item['author_profile_url'],
                                  })
-        except DuplicateKeyError as e:
+        except (KeyError, DuplicateKeyError) as e:
             print ('Trying to insert an author with same name: %s' % e)
         else:
             print ('Author inserted successfully: %s' % item['author'])
@@ -81,7 +86,7 @@ class LoadPipeLine(object):
                                       'keywords': item['keywords'],
                                       'article': item['article_text'],
                                     })
-        except DuplicateKeyError as e:
+        except (KeyError, DuplicateKeyError) as e:
             print ('Trying to insert an article with an existing title name: %s' % e)
         return item
   
