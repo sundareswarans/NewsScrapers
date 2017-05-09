@@ -28,7 +28,11 @@ class NewsExtractSpider(scrapy.Spider):
 	    # now request the news article page
             request = Request(url=article_url,
                               callback=self.parse_article)
+
             request.meta['news_item_loader'] = news_item_loader
+
+            # yield the request, so that scrapy engine will
+            # request the page concurrently at the background
             yield request
 
     def parse_article(self, response):
@@ -44,11 +48,11 @@ class NewsExtractSpider(scrapy.Spider):
         news_item_loader = response.meta['news_item_loader']
 
         # load the information relevant to the new item (Article)
-        news_item_loader.add_value('author', xps.select('//meta[@name="author"]/@content').extract())
-        news_item_loader.add_value('author_profile_url', xps.select('//a[@rel="author"]/@href').extract())
-        news_item_loader.add_value('title', xps.select('/html/head/title/text()').extract())
-        news_item_loader.add_value('headline', xps.select('//meta[@name="description"]/@content').extract())
-        news_item_loader.add_value('keywords', xps.select('//meta[@name="keywords"]/@content').extract())
+        news_item_loader.add_value('author', xps.select(r'//meta[@name="author"]/@content').extract_first())
+        news_item_loader.add_value('author_profile_url', xps.select(r'//a[@rel="author"]/@href').extract())
+        news_item_loader.add_value('title', xps.select(r'/html/head/title/text()').extract())
+        news_item_loader.add_value('headline', xps.select(r'//meta[@name="description"]/@content').extract())
+        news_item_loader.add_value('keywords', xps.select(r'//meta[@name="keywords"]/@content').extract())
         news_item_loader.add_value('article_text', xps.select(r'//article[@id="article"]').extract())
 
         # process this news item through the pipeline processor
