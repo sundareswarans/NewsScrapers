@@ -1,2 +1,4 @@
 scrapy
 pymongo
+# For elastic search DB v2.4.4
+elasticsearch-dsl>=2.0.0,<3.0.0
