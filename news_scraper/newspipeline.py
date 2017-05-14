@@ -10,14 +10,11 @@ from pymongo.errors import DuplicateKeyError
 from scrapy.exceptions import DropItem
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
+from elasticsearch_dsl.connections import connections
 
 from news_scraper.newsitems import NewsItem
 from news_scraper.news_es_items import NewsDocType
-
-
-from elasticsearch_dsl.connections import connections
-
-import settings
+import news_scraper.settings as settings
 
 
 class FilterPipeLine(object):
@@ -61,9 +58,6 @@ class TransformPipeLine(object):
 # NOTE: We are using SSL connection for connecting to the MongoDB
 # The CA certificate needs to be installed in the host where we run the client
 #
-NEWS_MONGO_DB_HOST_DEFAULT = r'mongodb://ssenthilvel:12345678@aws-ap-southeast-1-portal.2.dblayer.com:15386/articles?ssl=true'
-NEWS_MONGO_DB_HOST = os.getenv(r'NEWS_MONGO_DB_HOST', NEWS_MONGO_DB_HOST_DEFAULT)
-
 
 class LoadPipeLine(object):
     """
@@ -77,9 +71,9 @@ class LoadPipeLine(object):
     articles_db_name = 'articles'
     articles_coll_name = 'article'
 
-    def __init__(self, mongo_host_url=NEWS_MONGO_DB_HOST, mongo_db_name='articles'):
-        self.mongo_url = mongo_host_url
-        self.db_name = mongo_db_name
+    def __init__(self, mongo_host_url=None, mongo_db_name=None):
+        self.mongo_url = mongo_host_url or settings.MONGODB_DEFAULT_HOST
+        self.db_name = mongo_db_name or 'articles'
 
     def open_spider(self, spider):
         self.client = MongoClient(self.mongo_url)
